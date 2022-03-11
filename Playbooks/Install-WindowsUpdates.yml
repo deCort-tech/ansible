@@ -1,0 +1,29 @@
+- name: ensure services are up before doing anything
+  hosts: all
+  any_errors_fatal: true
+  serial: 1
+  tasks:
+     - name: ping
+       win_ping:
+
+- name: Install All Updates
+  win_updates:
+    category_names:
+      - CriticalUpdates
+      - SecurityUpdates
+      - UpdateRollups
+      - Updates
+      - DefinitionUpdates
+  register: check_finish
+
+- name: Check on reboot requirement
+  raw: shutdown.exe /r /t 10 /d p:2:3
+  when: check_finish.reboot_required != false
+
+- name: Waiting for Server to Restart
+  local_action:
+    wait_for
+    host={{ inventory_hostname }}
+    port=5986
+    delay=300
+    timeout=600

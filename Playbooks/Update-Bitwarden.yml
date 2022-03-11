@@ -1,0 +1,12 @@
+--- 
+- name: "Update Bitwareden to latest version"
+  hosts: all
+  tasks: 
+    - name: "Run Update Self"
+      become: true
+      command: "chdir=/etc/bitwarden ./bitwarden.sh updateself"
+      changed_when: 0
+    - name: "Run the update"
+      become: true
+      command: "chdir=/etc/bitwarden ./bitwarden.sh update"
+      changed_when: 0

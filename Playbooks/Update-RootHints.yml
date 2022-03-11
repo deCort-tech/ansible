@@ -1,0 +1,8 @@
+---
+- name: update root hints
+  hosts: all
+  tasks:
+    - name: download root hints and move to destination
+      get_url: 
+         url: https://www.internic.net/domain/named.root 
+         dest: /var/lib/unbound/root.hints

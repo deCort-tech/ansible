@@ -1,0 +1,80 @@
+---
+##########
+# Update debian/ubuntu packages
+##########
+
+
+# First verify that all servers are up
+- name: ensure services are up before doing anything
+  hosts: all
+  any_errors_fatal: false
+  serial: 1
+  tasks:
+    - name: Checking if all hosts are available
+      ping: 
+
+- name: upgrade packages and reboot (if necessary)
+  hosts: all
+  serial: 1 # one host at a time
+  any_errors_fatal: false
+  max_fail_percentage: 10
+
+  tasks: # tasks are done in order
+
+    # do an "apt-get update", to ensure latest package lists
+    - name: sudo apt-get update
+      command: sudo apt-get update -y
+      changed_when: 0
+
+    # do an "apt-get upgrade", to update all packages
+    - name: sudo apt-get upgrade
+      command: sudo apt-get upgrade -y
+      args:
+        warn: false # don't warn us about apt having its own plugin
+      changed_when: 0
+
+    # tell user about packages being updated
+    - name: show pending updates
+      debug:
+        var: updates
+      when: updates.0 is defined
+
+    # Cleanup unneeded packages
+    - name: apt-get autoremove
+      command: sudo apt-get -y autoremove
+      args:
+        warn: false
+      changed_when: 0
+
+    # check if we need a reboot
+    - name: check if reboot needed
+      stat: path=/var/run/reboot-required
+      register: file_reboot_required
+
+    # "meta: end_play" aborts the rest of the tasks in the current «tasks:»
+    # section, for the current webserver
+    # "when:" clause ensures that the "meta: end_play" only triggers if the
+    # current webserver does _not_ need a reboot
+    - meta: end_play
+      when: not file_reboot_required.stat.exists
+
+    # because of the above meta/when we at this point know that the current
+    # host needs a reboot
+
+    - name: reboot node
+      shell: sudo sleep 2 && sudo shutdown -r now "Reboot triggered by ansible"
+      async: 1
+      poll: 0
+      ignore_errors: true
+
+    # verify that services are back up
+    - name: verify that all hosts are up
+      wait_for_connection:
+
+    # wait a few minutes between hosts, unless we're on the last
+    - name: waiting between hosts
+      pause:
+        minutes: 1
+      when: inventory_hostname != ansible_play_hosts[-1]
+
+

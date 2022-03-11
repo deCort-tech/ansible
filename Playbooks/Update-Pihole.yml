@@ -1,0 +1,9 @@
+--- 
+- name: "Update Pihole to latest version"
+  hosts: all
+  serial: 1
+  tasks: 
+    - name: "Start update"
+      become: true
+      command: "pihole -up"
+      changed_when: 0

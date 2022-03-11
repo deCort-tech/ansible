@@ -1,0 +1,19 @@
+--- 
+- name: "Upgrade GitLab to the latest version"
+  hosts: all
+  tasks: 
+    - name: "sudo apt update"
+      become: true
+      changed_when: 0
+      command: "apt update -y"
+      
+    - name: "sudo apt install gitlab-ee"
+      become: true
+      changed_when: 0
+      command: "apt install gitlab-ee -y"
+      
+    - name: "sudo gitlab-ctl reconfigure"
+      become: true
+      changed_when: 0
+      command: "gitlab-ctl reconfigure"
+      

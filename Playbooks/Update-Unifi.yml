@@ -1,0 +1,19 @@
+--- 
+- name: "Upgrade Unifi Controller to latest version"
+  hosts: CTR01
+  tasks: 
+    - name: "cd /tmp/"
+      changed_when: 0
+      command: "cd /tmp/"
+      
+    - name: "wget https://dl.ui.com/unifi/5.10.27/unifi_sysvinit_all.deb"
+      become: true
+      changed_when: 0
+      command: "wget https://dl.ui.com/unifi/5.10.27/unifi_sysvinit_all.deb"
+      
+    - name: "Run the upgrade"
+      become: true
+      expect:
+         command: "dpkg -i unifi_sysvinit_all.deb"
+         responses: "yes"
+      

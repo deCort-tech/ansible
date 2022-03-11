@@ -1,0 +1,4 @@
+- name:  Ping test to check network connection
+  net_ping:
+     dest: [10.0.10.40, 10.0.10.150, 10.0.10.101]
+
